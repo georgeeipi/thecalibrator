@@ -1,0 +1,239 @@
+<!--
+Magnetic-Field Calibrator and ARPANSA Limit Calculator
+
+Copyright (c) 2026 George Galanis
+Licensed under the MIT License.
+See LICENSE in the project root.
+-->
+
+
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Magnetic-field calibrator: calculate H-field calibration and corresponding ARPANSA spectrum-analyser limits.">
+  <title>The Calibrator</title>
+  <link rel="stylesheet" href="magcalibrator.css">
+</head>
+
+
+<body>
+    <main class="page">
+      <header class="top">
+        <div><h1>Mag Calibrator — ARPANSA Limits Calculator</h1></div>
+        <div class="top-actions">
+          <button type="button" id="resetButton">reset</button>
+        </div>
+      </header>
+
+
+
+      <div class="layout">
+
+        <!---##########################################INPUTS########################################################--->
+        <section class="stack" aria-label="Calculator inputs">
+            <div class="card"><div class="card-heading"><h2>1. Calibrator design</h2></div>
+              <div class="card-body">
+                <div class="field loop-radius"><label for="a">Loop radius <i>a</i></label>
+                  <div class="input-wrap"><input id="a" type="number" step="any" min="0" inputmode="decimal">
+                    <span class="unit">mm</span>
+                  </div>
+                </div>
+
+                <div class="field"><label for="r3">Source resistor <i>R</i><sub>3</sub></label>
+                  <div class="input-wrap"><input id="r3" type="number" step="any" min="0" inputmode="decimal"><span class="unit">Ω</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-heading"><h2>2. Calibration measurements</h2></div>
+
+              <div class="card-body">
+                <div class="field"><label for="z">Probe separation <i>z</i></label>
+                  <div class="input-wrap"><input id="z" type="number" step="any" min="0" inputmode="decimal"><span class="unit">mm</span></div>
+                </div>
+                <div class="field"><label for="v">Voltage <i>V</i><sub>R3,RMS</sub></label>
+                  <div class="input-wrap"><input id="v" type="number" step="any" min="0" inputmode="decimal"><span class="unit">V</span></div>
+                </div>
+                <div class="field"><label for="pcal">Analyser reading <i>P</i><sub>cal</sub></label>
+                  <div class="input-wrap"><input id="pcal" type="number" step="any" inputmode="decimal"><span class="unit">dBm</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-heading"><h2>3. ARPANSA limits</h2></div>
+              <div class="card-body">
+                <div class="field">
+                    <label for="frequency">Frequency <i>f</i><span class="hint">100 kHz to 30 MHz</span></label>
+                    <div class="input-wrap">
+                      <input id="frequency" type="number" step="0.1" min="0.1" max="30" inputmode="decimal"><span class="unit">MHz</span>
+                    </div>
+                </div>
+                <div class="field"><span>Public: whole body</span><output class="derived" id="derived-hpublicWhole">—</output></div>
+                <div class="field"><span>Public: local</span><output class="derived" id="derived-hpublicLocal">—</output></div>
+                <div class="field"><span>Occupational: whole body</span><output class="derived" id="derived-hoccupWhole">—</output></div>
+                <div class="field"><span>Occupational: local</span><output class="derived" id="derived-hoccupLocal">—</output></div>
+                <p class="reference-source">ARPANSA
+                  <a href="https://www.arpansa.gov.au/sites/default/files/rps_s-1.pdf" target="_blank" rel="noopener">RPS S-1</a>,
+                    Local H-field values use the more restrictive applicable numerical reference level from ARPANSA
+                    Tables 5 and 7 for steady, single-frequency exposure.
+                </p>
+              </div>
+            </div>
+        </section>
+        <!---##########################################INPUTS########################################################--->
+
+        <!---##########################################H-LIMITS-CALC########################################################--->
+        <section aria-label="Equation flow">
+          <div class="eq-card" id="stage-current"><p class="eq-title"><span class="number">1</span> Calibration current</p>
+            <div class="equation">
+              <i>I</i><sub>cal</sub> = <span class="frac"><span><i>V</i>
+              <sub>R3,RMS</sub></span><span><i>R</i><sub>3</sub></span></span>
+            </div>
+            <div class="substitution" id="formulaCurrent" aria-live="off"> =
+                <span class="frac">
+                  <span id="currentVoltage">—</span>
+                  <span id="currentResistance">—</span>
+                </span>
+                = <span class="answer" id="currentAnswer">—</span>
+            </div>
+          </div>
+
+
+          <!-- Stage 2: Magnetic field -->
+          <div class="connector" id="arrow-h" aria-hidden="true"></div>
+
+          <div class="eq-card" id="stage-h">
+              <p class="eq-title">
+                <span class="number">2</span>
+                Magnetic field at distance <i>z</i>
+              </p>
+
+              <div class="equation">
+                <i>H</i><sub>cal</sub> =
+                <span class="frac">
+                          <span><i>a</i><sup>2</sup></span>
+                          <span>2(<i>a</i><sup>2</sup> + <i>z</i><sup>2</sup>)<sup>3/2</sup></span>
+                      </span>
+                <i>I</i><sub>cal</sub>
+              </div>
+
+              <div class="substitution" id="formulaH" aria-live="off">
+                   =
+                   <span class="frac">
+                    <span>
+                        <span id="fieldRadiusNumerator">—</span><sup>2</sup>
+                    </span>
+                    <span>
+                        2(<span id="fieldRadiusDenominator">—</span><sup>2</sup> +
+                        <span id="fieldDistance">—</span><sup>2</sup>)<sup>3/2</sup>
+                    </span>
+                  </span>
+                  ×
+                  <span id="fieldCurrent">—</span>
+                  <div>
+                    = <span class="answer" id="fieldAnswer">—</span>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Stage 3: Calibration constant -->
+          <div class="connector" id="arrow-cal" aria-hidden="true"></div>
+
+          <div class="eq-card" id="stage-cal">
+            <p class="eq-title">
+              <span class="number">3</span>
+              Calibration constant
+            </p>
+
+            <div class="equation">
+              <i>cal</i> = 20 log<sub>10</sub>(<i>H</i><sub>cal</sub>)
+              − <i>P</i><sub>cal,dBm</sub>
+            </div>
+
+            <div class="substitution" id="formulaCal" aria-live="off">
+              = 20 log<sub>10</sub>(<span id="calField">—</span>)
+              − (<span id="calPower">—</span>)
+              <div>
+                = <span class="answer" id="calAnswer">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 4: Spectrum-analyser limits -->
+          <div class="connector" id="arrow-limits" aria-hidden="true"></div>
+
+          <div class="eq-card" id="stage-limits">
+              <p class="eq-title">
+                <span class="number">4</span>
+                Spectrum-analyser limits
+              </p>
+
+              <div class="equation">
+                <i>P</i><sub>lim,dBm</sub> =
+                20 log<sub>10</sub>(<i>H</i><sub>lim</sub>) − <i>cal</i>
+              </div>
+
+
+              <div class="limit-steps" id="formulaLimits">
+
+                    <div class="limit-step">
+                          <span>
+                              Public — whole body:
+                              <span id="limit-hpublicWhole-calculation">
+                                  20 log<sub>10</sub>(<span id="limit-hpublicWhole-fieldInEquation">—</span>)
+                                  − <span id="limit-hpublicWhole-constant">—</span>
+                              </span>
+                          </span>
+                          <span id="limit-hpublicWhole-power">—</span>
+                    </div>
+
+                    <div class="limit-step">
+                          <span>
+                              Public — local:
+                              <span id="limit-hpublicLocal-calculation">
+                                  20 log<sub>10</sub>(<span id="limit-hpublicLocal-fieldInEquation">—</span>)
+                                  − <span id="limit-hpublicLocal-constant">—</span>
+                              </span>
+                          </span>
+                          <span id="limit-hpublicLocal-power">—</span>
+                    </div>
+
+                    <div class="limit-step">
+                          <span>
+                              Occupational — whole body:
+                              <span id="limit-hoccupWhole-calculation">
+                                  20 log<sub>10</sub>(<span id="limit-hoccupWhole-fieldInEquation">—</span>)
+                                  − <span id="limit-hoccupWhole-constant">—</span>
+                              </span>
+                          </span>
+                          <span id="limit-hoccupWhole-power">—</span>
+                    </div>
+
+                    <div class="limit-step">
+                          <span>
+                              Occupational — local:
+                              <span id="limit-hoccupLocal-calculation">
+                                  20 log<sub>10</sub>(<span id="limit-hoccupLocal-fieldInEquation">—</span>)
+                                  − <span id="limit-hoccupLocal-constant">—</span>
+                              </span>
+                          </span>
+                          <span id="limit-hoccupLocal-power">—</span>
+                   </div>
+              </div>
+          </div>
+
+        </section>
+        <!---##########################################H-LIMITS-CALC########################################################--->
+
+      </div>
+    </main>
+
+
+    <script src="magcalibrator.js" defer></script>
+
+</body>
+</html>
