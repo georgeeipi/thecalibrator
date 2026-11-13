@@ -1,0 +1,87 @@
+<!--
+Copyright (c) 2026 George Galanis
+Licensed under the MIT License.
+See LICENSE in the project root.
+-->
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Electric-field calibration and ARPANSA spectrum-analyser limits.">
+  <title>Electric Field Calibrator</title>
+  <link rel="stylesheet" href="calibrator.css">
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <div><h1>Electric Field Calibrator — ARPANSA Limits Calculator</h1></div>
+      <a class="navigation-button" href="index.html">The Calibrator</a>
+      <div class="top-actions"><button type="button" id="resetButton">reset</button></div>
+    </header>
+
+    <div class="layout">
+      <section class="stack" aria-label="Calculator inputs">
+        <div class="card">
+          <div class="card-heading"><h2>1. Calibrator design</h2></div>
+          <div class="card-body">
+            <div class="field"><label for="distance">Plate separation <i>d</i></label><div class="input-wrap"><input id="distance" type="number" step="any" min="0" inputmode="decimal"><span class="unit">mm</span></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-heading"><h2>2. Calibration measurements</h2></div>
+          <div class="card-body">
+            <div class="field"><label for="voltage">Plate voltage <i>V</i><sub>RMS</sub></label><div class="input-wrap"><input id="voltage" type="number" step="any" min="0" inputmode="decimal"><span class="unit">V</span></div></div>
+            <div class="field"><label for="pcal">Analyser reading <i>P</i><sub>cal</sub></label><div class="input-wrap"><input id="pcal" type="number" step="any" inputmode="decimal"><span class="unit">dBm</span></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-heading"><h2>3. ARPANSA limits</h2></div>
+          <div class="card-body">
+            <div class="field"><label for="frequency">Frequency <i>f</i><span class="hint">100 kHz to 30 MHz</span></label><div class="input-wrap"><input id="frequency" type="number" step="0.1" min="0.1" max="30" inputmode="decimal"><span class="unit">MHz</span></div></div>
+            <div class="field"><span>Public: whole body</span><output class="derived" id="field-publicWhole">—</output></div>
+            <div class="field"><span>Public: local</span><output class="derived" id="field-publicLocal">—</output></div>
+            <div class="field"><span>Public: instantaneous</span><output class="derived" id="field-publicPeak">—</output></div>
+            <div class="field"><span>Occupational: whole body</span><output class="derived" id="field-occupWhole">—</output></div>
+            <div class="field"><span>Occupational: local</span><output class="derived" id="field-occupLocal">—</output></div>
+            <div class="field"><span>Occupational: instantaneous</span><output class="derived" id="field-occupPeak">—</output></div>
+            <p class="reference-source">ARPANSA <a href="https://www.arpansa.gov.au/sites/default/files/rps_s-1.pdf" target="_blank" rel="noopener">RPS S-1</a>, Tables 4, 5 and 7. ES indicates the table refers to the instantaneous limit for electrostimulation.</p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Equation flow">
+        <div class="eq-card">
+          <p class="eq-title"><span class="number">1</span> Calibration electric field</p>
+          <div class="equation"><i>E</i><sub>cal</sub> = <span class="frac"><span><i>V</i><sub>RMS</sub></span><span><i>d</i></span></span></div>
+          <div class="substitution">= <span class="frac"><span id="fieldVoltage">—</span><span id="fieldDistance">—</span></span> = <span class="answer" id="fieldAnswer">—</span></div>
+          <p class="reference-source">Assumes a uniform electric field between the plates.</p>
+        </div>
+        <div class="connector" aria-hidden="true"></div>
+        <div class="eq-card">
+          <p class="eq-title"><span class="number">2</span> Calibration constant</p>
+          <div class="equation"><i>cal</i> = <i>P</i><sub>cal,dBm</sub> − 20 log<sub>10</sub>(<i>E</i><sub>cal</sub>)</div>
+          <div class="substitution">= (<span id="calPower">—</span>) − 20 log<sub>10</sub>(<span id="calField">—</span>)<div>= <span class="answer" id="calAnswer">—</span></div></div>
+        </div>
+        <div class="connector" aria-hidden="true"></div>
+        <div class="eq-card">
+          <p class="eq-title"><span class="number">3</span> Spectrum-analyser limits</p>
+          <div class="equation"><i>P</i><sub>lim,dBm</sub> = 20 log<sub>10</sub>(<i>E</i><sub>lim</sub>) + <i>cal</i></div>
+          <div class="limit-steps">
+            <div class="limit-step"><span>Public — whole body: <span id="calculation-publicWhole"></span></span><span id="power-publicWhole">—</span></div>
+            <div class="limit-step"><span>Public — local: <span id="calculation-publicLocal"></span></span><span id="power-publicLocal">—</span></div>
+            <div class="limit-step"><span>Public — instantaneous: <span id="calculation-publicPeak"></span></span><span id="power-publicPeak">—</span></div>
+            <div class="limit-step"><span>Occupational — whole body: <span id="calculation-occupWhole"></span></span><span id="power-occupWhole">—</span></div>
+            <div class="limit-step"><span>Occupational — local: <span id="calculation-occupLocal"></span></span><span id="power-occupLocal">—</span></div>
+            <div class="limit-step"><span>Occupational — instantaneous: <span id="calculation-occupPeak"></span></span><span id="power-occupPeak">—</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <footer><h4>&copy; MoonBounce 2026<br>Dr George Galanis, vk1pi/vk3eip</h4></footer>
+  </main>
+  <script src="calibrator.js" defer></script>
+  <script src="arpansa.js" defer></script>
+  <script src="elecalibrator.js" defer></script>
+</body>
+</html>

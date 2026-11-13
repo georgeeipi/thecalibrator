@@ -1,0 +1,100 @@
+Copyright (c) 2026 George Galanis
+Licensed under the MIT License.
+See LICENSE in the project root.
+
+Development and communication rules
+Work from the actual latest source files, not imagined or remembered versions.
+Make small, surgical changes rather than one monolithic change.
+Identify exactly which function and lines to replace or delete.
+Do not dump entire files unless requested.
+DO NOT SPRINKLE HARD CODED CONSTANTS ALL OVER THE SYSTEM.
+
+No nested functions. The aim is to keep functions short, not making them longer by putting functions in functions.
+
+Arrow expressions strictly prohibited. Spell out the object structure being used.
+Aim to match the object hierarchy to the functional hierarchy.
+Only pass the parts of a structure being used to subordinate functions.
+
+Ternary operators strictly prohibeted.
+ This follows from the readability requirement.
+ Do not use ternary operators as a means of reducing the line count.
+ Spell out the full if, elseif, else conditions.
+
+ Runtime guards proecting against programmer errors is strictly prohibited.
+ The point of running and testing in the IDE is that if there is a programming error we let the IDE catch the error.
+ Guards against programming errors just hide the error from the IDE.....that is bad.
+
+Prefer explicit parameters and local variables over global state.
+
+Global constants are acceptable if they do not change over the life of the execution.
+PUT Programmer controlled constants at top of the relevant module.
+Dependent constants follow lower down, if particularly unique put in relevant function.
+
+
+Avoid Object assign, unless this is absolutely nescessary.
+
+Internal to the whole simulation we work to normalised, and SI units.
+We only convert to other units as early on the inputs, or as late on the outputs, as possible.
+Hence, we do not need to keep track of units in variable and constant names within the simulation.
+If a quantity is an angle, internally it is radians. Only at input or output will we add a suffix
+such as ..._deg  to make it clear that we are now dealing with a value being processed specifically for outputing.
+
+Avoid early returns used to bypass a function’s operation. Establish whether the operation
+is required in the caller.
+This does not mean we are avoiding branching within a function, of course there is branching.
+But not executing anything, except the test for whether we compute anything at all, is to be avoided.
+Use explicit if/else branches within the function, with one normal return at the end.
+
+Break and continue statements for normal execution PROHIBTED.
+(yeah, I know, the software industry love to make code less human-readable,
+it's a power thing for them. They make code as incomprehensible as possible so only the guys that code
+everyday can understand it, and make them feel important. Here, there is no power game, you have to
+ignore much of your training in this regard and focus on your training where coding is readable,
+as simple as possible and no simpler.)
+
+Execeptional failure handling
+Perhaps only if something has really failed badly, ie no execution of the script is possible at all,
+stop the current operation and report failure to the caller or user interface.
+Such code decisions need to be referred back to the human programmer overseeing the code development.
+
+
+Avoid complexity.
+Avoid using shorhand to reduce lines of code. Readability is the main aim. (otherwise we'd just build it into hardware, eh?)
+
+Give direct technical answers without lengthy explanations of elementary concepts.
+
+Do not claim code is tested, correct or clear without examining it.
+
+Preferred Structure of JS
+Initialisation at the bottom of the script file
+Main processing functions and processing loops just above that.
+Global variables, requiring persistence just above the functions using them
+(as close as possible to the main processing and loop functions as possible)
+All other functions above those.
+In general functions take the variables required in through the parameter list
+and output results through their return.
+So we should see no persitent variables in this part of the script.
+If for some reason persistent globals are required here refer back to the human developer.
+At the top are the global constants.
+These are the constants that do not cahnge during the whole life of the execution of the script.
+These constants can be considered like the e s, pi s etc. where they never change.
+Since these constants never change and define the universe in which the code runs
+we do not need to show a functions dependance on these constants, unless it is important.
+If there is any doubt, then refer back to human developer.
+
+If you are naming a variable in a function, and you come up with a name such as "result"
+ask yourself why not equally consider the name "thingy", because that is what you are doing
+by calling a variable "result". Of couse if you have f(x,y,z), then you are calculating a "result".
+That goes without saying. But what actually is the "result" of f? That is the question you have
+avoided by calling it "result".
+
+
+Place UI event handlers and processing of inputs near the bottom of the .js script, above the initialising and mainloop code.
+
+Where we make code visible to the end user, remember that the code is there for 2 functions:
+It is a calling card to anyone reading the code, that we write quality readable code, and it is not AI slop.
+The code should be educational. People will visit my sites wanting to understand the principles of how
+the system works.
+We help them see and understand. And make us be as appealing for consultation as possible.
+
+

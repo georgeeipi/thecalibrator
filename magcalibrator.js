@@ -8,80 +8,6 @@
  */
 
 
-/**********************************************************************************************/
-/***************************************** ARPANSA LIMIT CALCULATIONS *************************/
-/**********************************************************************************************/
-// ============================================================================
-// ARPANSA RPS S-1 — REGULATORY LIMITS
-//
-// All regulatory constants and their calculation functions are defined here.
-// If the exposure standard changes, review this section.
-// The calculator code below does not contain regulatory limit values.
-// ============================================================================
-// ARPANSA Table 7 — spatial and temporal peak H-field limits (A/m)
-const ARPANSA_PUBLIC_PEAK = 21;
-const ARPANSA_OCC_PEAK = 80;
-const ARPANSA_PEAK_MAX_FREQUENCY_MHZ = 10;
-
-// ARPANSA RPS S-1, Tables 4 and 5
-// Frequencies in MHz; magnetic-field limits in A/m.
-
-const ARPANSA_PUBLIC_WHOLE = 2.2;
-const ARPANSA_PUBLIC_LOCAL = 4.9;
-const ARPANSA_OCC_WHOLE = 4.9;
-const ARPANSA_OCC_LOCAL = 10.8;
-
-const ARPANSA_PUBLIC_LOCAL_THRESHOLD = 0.233;
-const ARPANSA_OCC_LOCAL_THRESHOLD = 0.135;
-
-
-function ARPANSA_public_whole(fMHz) {
-    return ARPANSA_PUBLIC_WHOLE / fMHz;
-}
-
-function ARPANSA_public_local(fMHz) {
-
-    // Table 5 specifies ES below this frequency.
-    if (fMHz <= ARPANSA_PUBLIC_LOCAL_THRESHOLD) {
-        return ARPANSA_PUBLIC_PEAK;
-    }
-
-    const H_table5 = ARPANSA_PUBLIC_LOCAL / fMHz;
-
-    // Table 7 also applies up to 10 MHz.
-    if (fMHz <= ARPANSA_PEAK_MAX_FREQUENCY_MHZ && H_table5 > ARPANSA_PUBLIC_PEAK) {
-        return ARPANSA_PUBLIC_PEAK;
-    }
-
-    return H_table5;
-}
-
-function ARPANSA_occ_whole(fMHz) {
-    return ARPANSA_OCC_WHOLE / fMHz;
-}
-
-function ARPANSA_occ_local(fMHz) {
-
-    // Table 5 specifies ES below this frequency.
-    if (fMHz <= ARPANSA_OCC_LOCAL_THRESHOLD) {
-        return ARPANSA_OCC_PEAK;
-    }
-
-    const H_table5 = ARPANSA_OCC_LOCAL / fMHz;
-
-    // Table 7 also applies up to 10 MHz.
-    if (fMHz <= ARPANSA_PEAK_MAX_FREQUENCY_MHZ && H_table5 > ARPANSA_OCC_PEAK) {
-        return ARPANSA_OCC_PEAK;
-    }
-
-    return H_table5;
-}
-
-/**********************************************************************************************/
-/**********************************************************************************************/
-/**********************************************************************************************/
-
-
 // MAGNETIC-FIELD CALIBRATOR
 //
 // 1. Mathematical equations
@@ -107,28 +33,6 @@ function calculateCalibrationMagneticField(radiusMetres, distanceMetres, current
     return radiusSquared * currentAmps /
            (2 * Math.pow(radiusSquared + distanceSquared, 1.5));
 }
-
-// cal = 20 * log10(H_cal) - P_cal,dBm
-function calculateCalibrationConstant(magneticFieldAmpsPerMetre, analyserPowerDbm) {
-    return 20 * Math.log10(magneticFieldAmpsPerMetre) - analyserPowerDbm;
-}
-
-// P_lim,dBm = 20 * log10(H_lim) - cal
-function PlimdBm(H_lim, cal) {
-    return 20 * Math.log10(H_lim) - cal;
-}
-
-
-
-function formatNumber(value) {
-    return value.toLocaleString("en-AU", { maximumSignificantDigits: 7, useGrouping: false });
-}
-
-function formatPower(value) {
-    return value.toFixed(1) + " dBm";
-}
-
-
 
 function displayCalibrationCurrent(V_R3_RMS, R3, I_cal) {
     document.getElementById("currentVoltage").textContent = V_R3_RMS;
@@ -217,10 +121,10 @@ function updateCalibration() {
 function updateLimits() {
     const f = Number(document.getElementById("frequency").value);
 
-    const H_lim_public_whole = ARPANSA_public_whole(f);
-    const H_lim_public_local = ARPANSA_public_local(f);
-    const H_lim_occ_whole = ARPANSA_occ_whole(f);
-    const H_lim_occ_local = ARPANSA_occ_local(f);
+    const H_lim_public_whole = MAG_ARPANSA_public_whole(f);
+    const H_lim_public_local = MAG_ARPANSA_public_local(f);
+    const H_lim_occ_whole = MAG_ARPANSA_occ_whole(f);
+    const H_lim_occ_local = MAG_ARPANSA_occ_local(f);
 
     displayHlimit("hpublicWhole", H_lim_public_whole);
     displayHlimit("hpublicLocal", H_lim_public_local);
@@ -300,6 +204,7 @@ function initialiseListeners() {
 function initialiseCalculator() {
     initialiseListeners();
     initialiseCalculatorInputs();
+    initialiseCalculatorSteppers();
     updateCalibration();
 }
 
